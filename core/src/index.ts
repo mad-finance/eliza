@@ -13,6 +13,7 @@ import {
 } from "./adapters/postgres.ts";
 import { SqliteDatabaseAdapter } from "./adapters/sqlite.ts";
 import DirectClient from "./clients/direct/index.ts";
+import AdminClient from "./clients/admin/index.ts";
 import { DiscordClient } from "./clients/discord/index.ts";
 import { TelegramClient } from "./clients/telegram/src/index.ts"; // Added Telegram import
 import { TwitterGenerationClient } from "./clients/twitter/generate.ts";
@@ -73,6 +74,7 @@ const characterPaths = argv.characters?.split(",").map((path) => path.trim());
 const characters = [];
 
 const directClient = new DirectClient();
+const adminClient = new AdminClient();
 directClient.start(3000);
 
 if (characterPaths?.length > 0) {
@@ -112,7 +114,7 @@ async function startAgent(character: Character) {
     // Debug adapter
     // const loggingDb = createLoggingDatabaseAdapter(db);
   }
-  
+
   const runtime = new AgentRuntime({
     databaseAdapter: db,
     token,
@@ -151,9 +153,9 @@ async function startAgent(character: Character) {
 
   async function startTelegram(runtime: IAgentRuntime, character: Character) {
     console.log("🔍 Attempting to start Telegram bot...");
-    
+
     const botToken = runtime.getSetting('TELEGRAM_BOT_TOKEN');
-  
+
     if (!botToken) {
       console.error(
         `❌ Telegram bot token is not set for character ${character.name}.`

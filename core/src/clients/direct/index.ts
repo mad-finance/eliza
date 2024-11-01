@@ -55,8 +55,9 @@ export interface SimliClientConfig {
   audioRef: any
 }
 class DirectClient {
-  private app: express.Application;
-  private agents: Map<string, AgentRuntime>;
+  // public so we can access on extending clients
+  public app: express.Application;
+  public agents: Map<string, AgentRuntime>;
 
   constructor() {
     this.app = express();
@@ -66,55 +67,55 @@ class DirectClient {
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
 
-// Define an interface that extends the Express Request interface
-interface CustomRequest extends ExpressRequest {
-  file: File;
-}
+    // Define an interface that extends the Express Request interface
+    interface CustomRequest extends ExpressRequest {
+      file: File;
+    }
 
-// Update the route handler to use CustomRequest instead of express.Request
-this.app.post("/:agentId/whisper", upload.single('file'), async (req: CustomRequest, res: express.Response) => {
-  const audioFile = req.file; // Access the uploaded file using req.file
-  const agentId = req.params.agentId;
+    // Update the route handler to use CustomRequest instead of express.Request
+    this.app.post("/:agentId/whisper", upload.single('file'), async (req: CustomRequest, res: express.Response) => {
+      const audioFile = req.file; // Access the uploaded file using req.file
+      const agentId = req.params.agentId;
 
-  if (!audioFile) {
-    res.status(400).send("No audio file provided");
-    return;
-  }
+      if (!audioFile) {
+        res.status(400).send("No audio file provided");
+        return;
+      }
 
-  let runtime = this.agents.get(agentId);
+      let runtime = this.agents.get(agentId);
 
-  // if runtime is null, look for runtime with the same name
-  if (!runtime) {
-    runtime = Array.from(this.agents.values()).find((a) => a.character.name.toLowerCase() === agentId.toLowerCase());
-  }
+      // if runtime is null, look for runtime with the same name
+      if (!runtime) {
+        runtime = Array.from(this.agents.values()).find((a) => a.character.name.toLowerCase() === agentId.toLowerCase());
+      }
 
-  if (!runtime) {
-    res.status(404).send("Agent not found");
-    return;
-  }
+      if (!runtime) {
+        res.status(404).send("Agent not found");
+        return;
+      }
 
-  const formData = new FormData();
-  const audioBlob = new Blob([audioFile.buffer], { type: audioFile.mimetype });
-  formData.append('file', audioBlob, audioFile.originalname);
-  formData.append('model', 'whisper-1');
+      const formData = new FormData();
+      const audioBlob = new Blob([audioFile.buffer], { type: audioFile.mimetype });
+      formData.append('file', audioBlob, audioFile.originalname);
+      formData.append('model', 'whisper-1');
 
-  const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${runtime.token}`,
-    },
-    body: formData,
-  });
+      const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${runtime.token}`,
+        },
+        body: formData,
+      });
 
-  const data = await response.json();
-  res.json(data);
-});
+      const data = await response.json();
+      res.json(data);
+    });
 
     this.app.post("/:agentId/message", async (req: express.Request, res: express.Response) => {
       const agentId = req.params.agentId;
       const roomId = stringToUuid(req.body.roomId ?? ("default-room-" + agentId));
       const userId = stringToUuid(req.body.userId ?? "user");
-      
+
       let runtime = this.agents.get(agentId);
 
       // if runtime is null, look for runtime with the same name
