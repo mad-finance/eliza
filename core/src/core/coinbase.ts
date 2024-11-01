@@ -1,10 +1,10 @@
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
-import { getClient } from "./mongo";
-import { decrypt, encrypt } from "../utils/crypto";
+import { getClient } from "./mongo.ts";
+import { decrypt, encrypt } from "../utils/crypto.ts";
 
 // lens profile
 export type WalletProfile = { id: `0x${string}`, handle: string }
-export const getWallets = async (agentId: string): Promise<{ base: Wallet, polygon: Wallet, profile?: WalletProfile, adminProfileId: string } | undefined> => {
+export const getWallets = async (agentId: string, create = false): Promise<{ base: Wallet, polygon: Wallet, profile?: WalletProfile, adminProfileId: string } | undefined> => {
   Coinbase.configure({
     apiKeyName: process.env.COINBASE_API_NAME! as string,
     privateKey: process.env.COINBASE_API_PRIVATE_KEY!.replaceAll("\\n", "\n") as string,
@@ -17,7 +17,7 @@ export const getWallets = async (agentId: string): Promise<{ base: Wallet, polyg
   const walletData = await collection.findOne({ agentId });
 
   try {
-    if (!walletData) {
+    if (!walletData && create) {
       const [base, polygon] = await Promise.all([
         Wallet.create({ networkId: Coinbase.networks.BaseSepolia }),
         Wallet.create({ networkId: Coinbase.networks.PolygonMainnet })
@@ -30,7 +30,7 @@ export const getWallets = async (agentId: string): Promise<{ base: Wallet, polyg
           polygon: encrypt(JSON.stringify(polygon.export()))
         }
       });
-    } else {
+    } else if (walletData) {
       const [base, polygon] = await Promise.all([
         Wallet.import(JSON.parse(decrypt(walletData.wallets.base))),
         Wallet.import(JSON.parse(decrypt(walletData.wallets.polygon)))

@@ -1,10 +1,11 @@
 import express from "express";
 import { AgentRuntime } from "../../core/runtime.ts";
-import { getWallets } from "../../core/coinbase";
-import mintProfile from "../../services/lens/mintProfile";
-import { getClient } from "../../core/mongo";
-import parseJwt from "../../services/lens/parseJwt";
-import updateProfile from "../../services/lens/updateProfile.ts";
+import { getWallets } from "../../core/coinbase.ts";
+import { mintProfile } from "../../services/lens/mintProfile.ts";
+import { getClient } from "../../core/mongo.ts";
+import parseJwt from "../../services/lens/parseJwt.ts";
+import { updateProfile } from "../../services/lens/updateProfile.ts";
+import { addDelegators } from "../../services/lens/addDelegators.ts";
 
 class AdminClient {
   private app: express.Application;
@@ -14,7 +15,7 @@ class AdminClient {
     this.app = app;
     this.agents = agents;
 
-    this.app.post("admin/create/:agentId", async (req: express.Request, res: express.Response) => {
+    this.app.post("/admin/create/:agentId", async (req: express.Request, res: express.Response) => {
       // verify lens jwt token
       const { fundTxHash } = req.body;
       const { agentId } = req.params;
@@ -34,7 +35,7 @@ class AdminClient {
         return;
       }
 
-      const wallets = await getWallets(agentId);
+      const wallets = await getWallets(agentId, true);
       if (!wallets?.polygon) res.status(500).send("failed to load polygon wallet" );
 
       // TODO: verify `fundTxHash` was sent to this polygon wallet with value = 8 pol
@@ -44,7 +45,7 @@ class AdminClient {
         const { profileId, txHash } = await mintProfile(wallets!.polygon, agentId);
 
         const { collection } = await getClient();
-        collection.updateOne({ agentId }, { $set: { profileId, adminProfileId } });
+        await collection.updateOne({ agentId }, { $set: { profileId, adminProfileId } });
 
         res.status(!!profileId ? 200 : 400).json({ profileId, txHash });
       } catch (error) {
@@ -53,9 +54,9 @@ class AdminClient {
       }
     });
 
-    this.app.post("admin/update/:agentId", async (req: express.Request, res: express.Response) => {
+    this.app.put("/admin/:agentId", async (req: express.Request, res: express.Response) => {
       // verify lens jwt token
-      const { profileData, approveSignless } = req.body;
+      const { profileData, approveSignless, delegators } = req.body;
       const { agentId } = req.params;
       const token = req.headers['lens-access-token'] as string;
       if (!token) {
@@ -82,6 +83,24 @@ class AdminClient {
         console.log(error);
         res.status(400).send(error);
       }
+    });
+
+    this.app.get("/:agentId/info", async (req: express.Request, res: express.Response) => {
+      const { agentId } = req.params;
+      if (!agentId) {
+        res.status(400).send();
+        return;
+      }
+
+      const wallets = await getWallets(agentId);
+      if (!wallets) {
+        res.status(404).send();
+        return;
+      }
+      const [polygon] = await wallets.polygon.listAddresses();
+      const [base] = await wallets?.base.listAddresses();
+
+      res.status(200).json({ wallets: { polygon: polygon.getId(), base: base.getId() } });
     });
   }
 }

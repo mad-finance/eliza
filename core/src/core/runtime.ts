@@ -104,7 +104,7 @@ export class AgentRuntime implements IAgentRuntime {
   /**
    * The model to use for generateText.
    */
-  modelProvider = ModelProvider.LLAMALOCAL;
+  modelProvider = ModelProvider.OPENAI;
 
   /**
    * The model to use for image generation.
@@ -675,7 +675,7 @@ export class AgentRuntime implements IAgentRuntime {
       .map(
         (attachment) =>
           `ID: ${attachment.id}
-Name: ${attachment.title} 
+Name: ${attachment.title}
 URL: ${attachment.url}
 Type: ${attachment.source}
 Description: ${attachment.description}
@@ -1036,7 +1036,7 @@ Text: ${attachment.text}
         (attachment) =>
           `ID: ${attachment.id}
 Name: ${attachment.title}
-URL: ${attachment.url} 
+URL: ${attachment.url}
 Type: ${attachment.source}
 Description: ${attachment.description}
 Text: ${attachment.text}

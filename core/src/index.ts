@@ -74,7 +74,7 @@ const characterPaths = argv.characters?.split(",").map((path) => path.trim());
 const characters = [];
 
 const directClient = new DirectClient();
-const adminClient = new AdminClient();
+const adminClient = new AdminClient(directClient.app, directClient.agents);
 directClient.start(3000);
 
 if (characterPaths?.length > 0) {

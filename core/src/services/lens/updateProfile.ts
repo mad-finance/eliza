@@ -1,24 +1,22 @@
 import { Wallet } from "@coinbase/coinbase-sdk"
 import { LensClient, production, isRelaySuccess, LensTransactionStatusType } from "@lens-protocol/client"
-import { profile, ProfileOptions } from '@lens-protocol/metadata';
+import { hashMessage } from 'viem';
+import { profile, ProfileOptions } from "@lens-protocol/metadata";
 
-import { uploadJson } from "./ipfs"
-
-const environment = production
+import { uploadJson } from "./ipfs.ts";
 
 // update profile metadata owned by the wallet
-export default async (wallet: Wallet, profileId: string, profileData: ProfileOptions, approveSignless?: boolean) => {
+export const updateProfile = async (wallet: Wallet, profileId: string, profileData: ProfileOptions, approveSignless?: boolean) => {
   // authenticate with api
-  const client = new LensClient({
-    environment,
-  })
+  const client = new LensClient({ environment: production })
   const [address] = await wallet.listAddresses()
   const challenge = await client.authentication.generateChallenge({
-    signedBy: address as unknown as string,
+    signedBy: address.getId(),
     for: profileId,
   })
-  const signature = await wallet.signMessage(challenge.text)
-  await client.authentication.authenticate({ id: challenge.id, signature })
+  let signature = await wallet.createPayloadSignature(hashMessage(challenge.text));
+  signature = await signature.wait();
+  await client.authentication.authenticate({ id: challenge.id, signature: signature.getSignature() });
 
   const metadata = profile(profileData)
   const metadataURI = await uploadJson(metadata);

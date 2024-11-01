@@ -1,4 +1,4 @@
-import { decodeEventLog, getAddress, TransactionReceipt, createPublicClient, http } from "viem";
+import { decodeEventLog, getAddress, TransactionReceipt, createPublicClient, http, Log } from "viem";
 import { polygon } from "viem/chains";
 
 interface GetEventFromReceiptProps {
@@ -16,8 +16,8 @@ export const getEventFromReceipt = ({
   contractAddress,
   abi,
   eventName
-}: GetEventFromReceiptProps) => {
-  const logs = contractAddress
+}: GetEventFromReceiptProps): { args?: any } => {
+  const logs: any[] = contractAddress
     ? transactionReceipt.logs.filter(({ address }) => getAddress(address) === getAddress(contractAddress))
     : transactionReceipt.logs;
 
@@ -27,7 +27,7 @@ export const getEventFromReceipt = ({
         return decodeEventLog({ abi, data: l.data, topics: l.topics });
       } catch { return {}; }
     })
-    .find((event) => event.eventName === eventName);
+    .find((event: { eventName: string, args: any}) => event.eventName === eventName);
 };
 
 export const getPublicClient = (chain: string) => {
