@@ -1,0 +1,8 @@
+{
+	"crons": [
+		{
+			"path": "/cron/bons_ai/post",
+			"schedule": "0 */6 * * *"
+		}
+	]
+}
