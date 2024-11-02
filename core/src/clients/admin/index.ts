@@ -56,11 +56,15 @@ class AdminClient {
 
     this.app.put("/admin/:agentId", async (req: express.Request, res: express.Response) => {
       // verify lens jwt token
-      const { profileData, approveSignless, delegators } = req.body;
+      const { profileData, approveSignless } = req.body;
       const { agentId } = req.params;
       const token = req.headers['lens-access-token'] as string;
       if (!token) {
         res.status(401).send("Lens access token is required");
+        return;
+      }
+      if (!profileData) {
+        res.status(400).send("profileData is required");
         return;
       }
       const { id: adminProfileId } = parseJwt(token);

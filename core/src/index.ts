@@ -14,6 +14,7 @@ import {
 import { SqliteDatabaseAdapter } from "./adapters/sqlite.ts";
 import DirectClient from "./clients/direct/index.ts";
 import AdminClient from "./clients/admin/index.ts";
+import CronClient from "./clients/cron/index.ts";
 import { DiscordClient } from "./clients/discord/index.ts";
 import { TelegramClient } from "./clients/telegram/src/index.ts"; // Added Telegram import
 import { TwitterGenerationClient } from "./clients/twitter/generate.ts";
@@ -75,6 +76,7 @@ const characters = [];
 
 const directClient = new DirectClient();
 const adminClient = new AdminClient(directClient.app, directClient.agents);
+const cronClient = new CronClient(directClient.app, directClient.agents);
 directClient.start(3000);
 
 if (characterPaths?.length > 0) {
