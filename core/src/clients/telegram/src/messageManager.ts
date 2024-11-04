@@ -133,10 +133,10 @@ export class MessageManager {
     // Send long messages in chunks
     private async sendMessageInChunks(
         ctx: Context,
-        content: string,
+        content: any, // text, attachments
         replyToMessageId?: number
     ): Promise<Message.TextMessage[]> {
-        const chunks = this.splitMessage(content);
+        const chunks = this.splitMessage(content.text);
         const sentMessages: Message.TextMessage[] = [];
 
         for (let i = 0; i < chunks.length; i++) {
@@ -151,6 +151,23 @@ export class MessageManager {
                             : undefined,
                 }
             )) as Message.TextMessage;
+
+            // if there's a photo url send that too
+            if (i === chunks.length - 1 && content.attachments) {
+                if (content.attachments[0]?.url && content.attachments[0].url.startsWith("data:image")) {
+                    // Extract just the base64 string without the data:image prefix
+                    const base64Data = content.attachments[0].url.split(',')[1];
+                    
+                    // Convert base64 to buffer
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    
+                    // Create InputFile from buffer
+                    await ctx.telegram.sendPhoto(
+                        ctx.chat.id, 
+                        { source: buffer }
+                    );
+                }
+            }
 
             sentMessages.push(sentMessage);
         }
@@ -321,7 +338,7 @@ export class MessageManager {
             const callback: HandlerCallback = async (content: Content) => {
                 const sentMessages = await this.sendMessageInChunks(
                     ctx,
-                    content.text,
+                    content,
                     message.message_id
                 );
 
@@ -340,7 +357,7 @@ export class MessageManager {
                         content: {
                             ...content,
                             text: sentMessage.text,
-                            action: !isLastMessage ? "CONTINUE" : undefined,
+                            action: !isLastMessage ? "CONTINUE" : content.action,
                             inReplyTo: messageId,
                         },
                         createdAt: sentMessage.date * 1000,
