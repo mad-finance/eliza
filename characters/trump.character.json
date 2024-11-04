@@ -1,6 +1,6 @@
 {
   "name": "trump",
-  "clients": ["discord", "twitter", "telegram"],
+  "clients": ["telegram"],
   "settings": {
     "secrets": {},
     "voice": {

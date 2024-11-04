@@ -101,10 +101,10 @@ export class AgentRuntime implements IAgentRuntime {
      */
     providers: Provider[] = [];
 
-    /**
-     * The model to use for generateText.
-     */
-    modelProvider = ModelProvider.LLAMALOCAL;
+  /**
+   * The model to use for generateText.
+   */
+  modelProvider = ModelProvider.GROK;
 
     /**
      * The model to use for image generation.

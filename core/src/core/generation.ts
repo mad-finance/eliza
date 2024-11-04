@@ -45,6 +45,9 @@ export async function generateText({
         return "";
     }
 
+    // FIX: slow doesn't actually exist anywhere?
+    if (modelClass == "slow") modelClass = ModelClass.SMALL;
+
     const provider = runtime.modelProvider;
     const model = models[provider].model[modelClass];
     const temperature = models[provider].settings.temperature;
@@ -67,6 +70,8 @@ export async function generateText({
         prettyConsole.log(
             `Using provider: ${provider}, model: ${model}, temperature: ${temperature}, max response length: ${max_response_length}`
         );
+
+        console.log("MODEL", provider);
 
         switch (provider) {
             case ModelProvider.OPENAI:
@@ -125,6 +130,7 @@ export async function generateText({
                     frequencyPenalty: frequency_penalty,
                     presencePenalty: presence_penalty,
                 });
+                console.log(grokResponse);
 
                 response = grokResponse;
                 prettyConsole.log("Received response from Grok model.");
