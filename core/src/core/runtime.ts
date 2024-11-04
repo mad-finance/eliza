@@ -104,7 +104,7 @@ export class AgentRuntime implements IAgentRuntime {
   /**
    * The model to use for generateText.
    */
-  modelProvider = ModelProvider.GROK;
+  modelProvider = ModelProvider.OPENAI;
 
     /**
      * The model to use for image generation.
