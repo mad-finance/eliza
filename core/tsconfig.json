@@ -1,10 +1,9 @@
 {
     "compilerOptions": {
-        "target": "es2022",
-        "module": "es2022",
-        "lib": ["es2023", "dom"],
-        "types": ["node"],
-        "moduleResolution": "bundler",
+        "target": "ESNext",
+        "module": "ESNext",
+        "lib": ["ESNext", "dom"],
+        "moduleResolution": "Bundler",
         "outDir": "./dist",
         "rootDir": "./src",
         "strict": false,
@@ -21,8 +20,8 @@
         "noEmitOnError": false,
         "moduleDetection": "force",
         "allowArbitraryExtensions": true,
-        "typeRoots": ["./node_modules/@types", "./types"]
+        "typeRoots": ["./node_modules/@types", "./types", "./node_modules/jest/types"]
     },
-    "include": ["src/**/*",],
+    "include": ["src/**/*"],
     "exclude": ["node_modules", "dist", "src/**/*.d.ts", "types/**/*.test.ts"]
 }

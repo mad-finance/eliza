@@ -1,7 +1,7 @@
-import time from "../providers/time.ts";
+import { timeProvider } from "../providers/time.ts";
 import { IAgentRuntime, State, type Memory, type Provider } from "./types.ts";
 
-export const defaultProviders: Provider[] = [time];
+export const defaultProviders: Provider[] = [timeProvider];
 
 /**
  * Formats provider outputs into a string which can be injected into the context.
@@ -11,15 +11,15 @@ export const defaultProviders: Provider[] = [time];
  * @returns A string that concatenates the outputs of each provider.
  */
 export async function getProviders(
-  runtime: IAgentRuntime,
-  message: Memory,
-  state?: State,
+    runtime: IAgentRuntime,
+    message: Memory,
+    state?: State
 ) {
-  const providerResults = await Promise.all(
-    runtime.providers.map(async (provider) => {
-      return await provider.get(runtime, message, state);
-    }),
-  );
+    const providerResults = await Promise.all(
+        runtime.providers.map(async (provider) => {
+            return await provider.get(runtime, message, state);
+        })
+    );
 
-  return providerResults.join("\n");
+    return providerResults.join("\n");
 }
