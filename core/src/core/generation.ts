@@ -115,7 +115,10 @@ export async function generateText({
 
             case ModelProvider.GROK: {
                 prettyConsole.log("Initializing Grok model.");
-                const grok = createGroq({ apiKey });
+                const grok = createGroq({
+                    apiKey: process.env.XAI_API_KEY,
+                    baseURL: models[provider].endpoint,
+                });
 
                 const { text: grokResponse } = await aiGenerateText({
                     model: grok.languageModel(model, {
@@ -137,7 +140,7 @@ export async function generateText({
             case ModelProvider.GROQ: {
                 console.log("Initializing Groq model.");
                 const groq = createGroq({ apiKey });
-    
+
                 const { text: groqResponse } = await aiGenerateText({
                     model: groq.languageModel(model),
                     prompt: context,
@@ -146,7 +149,7 @@ export async function generateText({
                     frequencyPenalty: frequency_penalty,
                     presencePenalty: presence_penalty,
                 });
-    
+
                 response = groqResponse;
                 console.log("Received response from Groq model.");
                 break;

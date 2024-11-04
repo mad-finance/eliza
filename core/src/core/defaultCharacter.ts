@@ -7,7 +7,7 @@ const defaultCharacter: Character = {
         // "discord",
         // "twitter"
     ],
-    modelProvider: ModelProvider.OPENAI,
+    modelProvider: ModelProvider.GROK,
     settings: {
         secrets: {},
         voice: {
