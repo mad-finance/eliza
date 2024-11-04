@@ -45,6 +45,9 @@ export async function generateText({
         return "";
     }
 
+    // FIX: slow doesn't actually exist anywhere?
+    if (modelClass == "slow") modelClass = ModelClass.SMALL;
+
     const provider = runtime.modelProvider;
     const model = models[provider].model[modelClass];
     const temperature = models[provider].settings.temperature;
