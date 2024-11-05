@@ -57,7 +57,7 @@ export const imageGeneration: Action = {
             );
             for (let i = 0; i < images.data.length; i++) {
                 const image = images.data[i];
-                prettyConsole.log(`Processing image ${i + 1}:`, image);
+                prettyConsole.log(`Processing image ${i + 1}:`, image.slice(0, 50) + "...");
 
                 const caption = await generateCaption(
                     {
