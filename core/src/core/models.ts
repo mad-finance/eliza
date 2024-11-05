@@ -69,14 +69,14 @@ const models: Models = {
             maxOutputTokens: 8192,
             frequency_penalty: 0.0,
             presence_penalty: 0.0,
-            temperature: 0.3,
+            temperature: 0.8,
         },
         endpoint: "https://api.x.ai/v1",
         model: {
-            [ModelClass.SMALL]: "grok-2-beta",
-            [ModelClass.MEDIUM]: "grok-2-beta",
-            [ModelClass.LARGE]: "grok-2-beta",
-            [ModelClass.EMBEDDING]: "grok-2-beta", // not sure about this one
+            [ModelClass.SMALL]: "grok-beta",
+            [ModelClass.MEDIUM]: "grok-beta",
+            [ModelClass.LARGE]: "grok-beta",
+            [ModelClass.EMBEDDING]: "grok-beta", // not sure about this one
         },
     },
     [ModelProvider.GROQ]: {
