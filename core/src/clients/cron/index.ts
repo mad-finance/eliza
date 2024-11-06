@@ -3,6 +3,10 @@ import { AgentRuntime } from "../../core/runtime.ts";
 import { getWallets } from "../../core/coinbase.ts";
 // import createPost from "../../services/orb/createPost.ts";
 import { tipPublication } from "../../services/orb/tip.ts";
+import { OrbGenerationClient } from "../orb/generate.ts";
+import { createAgentRuntime, createDirectRuntime, getTokenForProvider, initializeDatabase } from "../../cli/index.ts";
+import  { DirectClient } from "../direct/index.ts";
+import defaultCharacter from "../../core/defaultCharacter.ts";
 
 class CronClient {
   private app: express.Application;
@@ -24,15 +28,23 @@ class CronClient {
 
       if (!wallets?.polygon) res.status(500).send("failed to load polygon wallet");
 
-      // TODO: choose what to post right now; imageURL should be hosted by us
-      // const text = "";
-      // const imageURL = undefined;
-
       try {
-        // const success = await createPost(wallets?.polygon, wallets?.profile.id, text, imageURL);
+        
+        /* start character and runtime */
+        const character = defaultCharacter;
+        const directClient = new DirectClient();
+        console.log(`Starting agent for character ${character.name}`);
+        const token = getTokenForProvider(character.modelProvider, character);
+        const db = initializeDatabase();
+    
+        const runtime = await createAgentRuntime(character, db, token);
+        const directRuntime = createDirectRuntime(character, db, token);
+    
+        const client = new OrbGenerationClient(runtime, wallets);
+        directClient.registerAgent(await directRuntime);
 
-        const success = true;
-        await tipPublication(wallets?.polygon, "0x0e76-0x03a6-DA-011927f3", 10, "hi from [REDACTED]");
+        /* create post */
+        const success = await client.generateNewPost()
 
         res.status(success ? 200 : 400).json();
       } catch (error) {
