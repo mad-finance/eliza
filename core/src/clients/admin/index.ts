@@ -109,4 +109,4 @@ class AdminClient {
   }
 }
 
-export default AdminClient;
+export { AdminClient };

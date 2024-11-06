@@ -5,8 +5,6 @@ export * from "./adapters/index.ts";
 export * from "./providers/index.ts";
 
 import * as Client from "./clients/index.ts";
-import AdminClient from "./clients/admin/index.ts";
-import CronClient from "./clients/cron/index.ts";
 
 import { Character } from "./core/types.ts";
 
@@ -28,8 +26,8 @@ let argv: Arguments = parseArguments();
 const characters = loadCharacters(argv.characters);
 
 const directClient = new Client.DirectClient();
-const adminClient = new AdminClient(directClient.app, directClient.agents);
-const cronClient = new CronClient(directClient.app, directClient.agents);
+new Client.AdminClient(directClient.app, directClient.agents);
+new Client.CronClient(directClient.app, directClient.agents);
 
 // Initialize the pretty console
 export const prettyConsole = new PrettyConsole();

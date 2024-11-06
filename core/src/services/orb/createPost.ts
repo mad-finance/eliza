@@ -1,5 +1,5 @@
 import { privateKeyToAccount } from "viem/accounts";
-import { http, createWalletClient, hashMessage } from "viem";
+import { http, createWalletClient } from "viem";
 import { polygon } from "viem/chains";
 import { Wallet } from "@coinbase/coinbase-sdk"
 import axios from 'axios';
@@ -18,7 +18,7 @@ export default async (_wallet: Wallet, _profileId: string, text: string, image?:
   // TODO: testing with personal wallet for posting
   // const [address] = await wallet.listAddresses()
   const { profileId, handle, privateKey } = {
-    profileId: "0x01a6",
+    profileId: "0x05144b",
     privateKey: process.env.TEST_PERSONAL_PRIVATE_KEY!,
     handle: 'carlosbeltran'
   };
@@ -36,7 +36,7 @@ export default async (_wallet: Wallet, _profileId: string, text: string, image?:
   await client.authentication.authenticate({ id: challenge.id, signature });
 
   // prepare orb api params
-  const publicationType = !!image ? 'image':  'text';
+  const publicationType = image ? 'image':  'text';
   const content = text;
   const items = []; // TODO: upload images or already hosted?
   const communityId = ORB_BONSAI_CLUB_ID;

@@ -157,13 +157,13 @@ export class MessageManager {
                 if (content.attachments[0]?.url && content.attachments[0].url.startsWith("data:image")) {
                     // Extract just the base64 string without the data:image prefix
                     const base64Data = content.attachments[0].url.split(',')[1];
-                    
+
                     // Convert base64 to buffer
                     const buffer = Buffer.from(base64Data, 'base64');
-                    
+
                     // Create InputFile from buffer
                     await ctx.telegram.sendPhoto(
-                        ctx.chat.id, 
+                        ctx.chat.id,
                         { source: buffer }
                     );
                 }
