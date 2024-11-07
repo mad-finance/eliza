@@ -1,13 +1,15 @@
+import { ImageGenModel } from "./imageGenModels.ts";
 import { Character, ModelProvider } from "./types.ts";
 
 const defaultCharacter: Character = {
     name: "BONS",
     clients: [
-        "telegram",
+        // "telegram",
         // "discord",
         // "twitter"
     ],
     modelProvider: ModelProvider.GROK,
+    imageGenModel: ImageGenModel.DeepInfra,
     settings: {
         secrets: {},
         voice: {

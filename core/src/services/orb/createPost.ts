@@ -12,15 +12,15 @@ const ORB_BONSAI_CLUB_ID = "65e6dec26d85271723b6357c";
 const ORB_BONSAI_CLUB_TREASURY_ADDRESS = "0xa713822097941a68ab495a2f56ba6b276775c4b7";
 
 // post to lens from the first profile in the wallet
-export default async (_wallet: Wallet, _profileId: string, text: string, image?: string) => {
+export default async (_wallet: Wallet, _profileId: string, text: string, imageUrl?: string) => {
   const client = new LensClient({ environment: production });
 
   // TODO: testing with personal wallet for posting
   // const [address] = await wallet.listAddresses()
   const { profileId, handle, privateKey } = {
-    profileId: "0x05144b",
+    profileId: "0x0e76",
     privateKey: process.env.TEST_PERSONAL_PRIVATE_KEY!,
-    handle: 'carlosbeltran'
+    handle: 'natem'
   };
   const account = privateKeyToAccount(privateKey as `0x${string}`);
   const wallet = createWalletClient({
@@ -36,11 +36,14 @@ export default async (_wallet: Wallet, _profileId: string, text: string, image?:
   await client.authentication.authenticate({ id: challenge.id, signature });
 
   // prepare orb api params
-  const publicationType = image ? 'image':  'text';
+  const publicationType = imageUrl ? 'image':  'text';
   const content = text;
-  const items = []; // TODO: upload images or already hosted?
+  const items = imageUrl ? [{
+      url: imageUrl,
+      type: "image/png",
+  }] : [];
   const communityId = ORB_BONSAI_CLUB_ID;
-  const digitalCollectibleSettings = image ? {
+  const digitalCollectibleSettings = imageUrl ? {
     endsAt: null,
     followerOnly: false,
     currency: BONSAI_TOKEN_ADDRESS_POLYGON,

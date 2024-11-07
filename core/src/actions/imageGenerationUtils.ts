@@ -4,6 +4,7 @@ import Together from "together-ai";
 import { IAgentRuntime } from "../core/types.ts";
 import { getModel, ImageGenModel } from "../core/imageGenModels.ts";
 import OpenAI from "openai";
+import { generateImageDeepInfra } from "../services/deepinfra/generateImage.ts";
 
 export const generateImage = async (
     data: {
@@ -29,6 +30,8 @@ export const generateImage = async (
     const apiKey =
         imageGenModel === ImageGenModel.TogetherAI
             ? runtime.getSetting("TOGETHER_API_KEY")
+            : imageGenModel === ImageGenModel.DeepInfra 
+            ? ""
             : runtime.getSetting("OPENAI_API_KEY");
 
     try {
@@ -59,6 +62,9 @@ export const generateImage = async (
                 })
             );
             return { success: true, data: base64s };
+        } else if (imageGenModel === ImageGenModel.DeepInfra) {
+            const imageUrl = await generateImageDeepInfra(prompt)
+            return { success: true, data: [imageUrl] };
         } else {
             let targetSize = `${width}x${height}`;
             if (

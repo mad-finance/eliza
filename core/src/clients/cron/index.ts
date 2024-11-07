@@ -44,7 +44,8 @@ class CronClient {
         directClient.registerAgent(await directRuntime);
 
         /* create post */
-        const success = await client.generateNewPost()
+        const generateImage = Math.random() < 0.15
+        const success = await client.generateNewPost(generateImage)
 
         res.status(success ? 200 : 400).json();
       } catch (error) {

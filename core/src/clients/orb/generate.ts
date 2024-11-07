@@ -2,7 +2,7 @@ import fs from "fs";
 import { composeContext } from "../../core/context.ts";
 import { log_to_file } from "../../core/logger.ts";
 import { embeddingZeroVector } from "../../core/memory.ts";
-import { IAgentRuntime, ModelClass } from "../../core/types.ts";
+import { Content, HandlerCallback, IAgentRuntime, Memory, ModelClass } from "../../core/types.ts";
 import { stringToUuid } from "../../core/uuid.ts";
 import { ClientBase } from "./base.ts";
 import { generateText } from "../../core/generation.ts";
@@ -38,7 +38,7 @@ export class OrbGenerationClient extends ClientBase {
         this.wallets = _wallets
     }
 
-    public async generateNewPost(): Promise<boolean> {
+    public async generateNewPost(generateImage = false): Promise<boolean> {
         console.log("Generating new post");
         try {
             let homeTimeline = [];
@@ -88,27 +88,52 @@ export class OrbGenerationClient extends ClientBase {
 
             const content = newPostContent.replaceAll(/\\n/g, "\n").trim();
 
-            // TODO: roll dice for whether to add an image
-            const imageURL = undefined;
+            const conversationId = datestr + "-" + this.runtime.agentId;
+            const roomId = stringToUuid(conversationId);
+
+            let imageURL = undefined;
+            if (generateImage) {
+                const callback: HandlerCallback = async (content: Content) => {
+                    imageURL = content.attachments[0]?.url
+                    return []
+                };
+                // TODO: generate an image
+                const memory = {
+                    id: stringToUuid(datestr + "-" + this.runtime.agentId),
+                    userId: this.runtime.agentId,
+                    agentId: this.runtime.agentId,
+                    content: {
+                        text: content.trim(),
+                        source: "orb",
+                        action: "GENERATE_IMAGE"
+                    },
+                    roomId,
+                    embedding: embeddingZeroVector,
+                }
+                await this.runtime.processActions(
+                    memory,
+                    [memory],
+                    state,
+                    callback
+                );
+            }
 
             // Send the new post
             if (!this.dryRun) {
                 try {
-                    const result = await this.requestQueue.add(
+                    const postResult: { txHash: string, txId: string } = await this.requestQueue.add(
                         async () => await createPost(this.wallets?.polygon, this.wallets?.profile.id, content, imageURL)
                     );
-                    // read the body of the response
-                    const postResult = await result.json();
 
                     // TODO: come back to these values
                     const post = {
-                        id: postResult.id,
+                        id: postResult.txHash,
                         text: content,
                         conversationId: null,
                         createdAt: Date.now() * 1000,
                         userId: this.wallets?.profile.id,
                         inReplyToStatusId: null,
-                        permanentUrl: `https://hey.xyz/${this.wallets?.profile.id}/${postResult.id}`,
+                        permanentUrl: `https://hey.xyz/${this.wallets?.profile.id}/${postResult.txHash}`,
                         hashtags: [],
                         mentions: [],
                         photos: [],
@@ -118,8 +143,7 @@ export class OrbGenerationClient extends ClientBase {
                     };
 
                     const postId = post.id;
-                    const conversationId = post.conversationId + "-" + this.runtime.agentId;
-                    const roomId = stringToUuid(conversationId);
+                    
 
                     // make sure the agent is in the room
                     await this.runtime.ensureRoomExists(roomId);

@@ -119,6 +119,7 @@
         "cors": "2.8.5",
         "cross-fetch": "4.0.0",
         "csv-writer": "1.6.0",
+        "deepinfra": "^2.0.2",
         "discord.js": "14.16.3",
         "espeak-ng": "1.0.2",
         "express": "4.21.1",
