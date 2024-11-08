@@ -56,6 +56,7 @@ import { UUID, type Actor } from "./types.ts";
 import { stringToUuid } from "./uuid.ts";
 import { ImageGenModel } from "./imageGenModels.ts";
 import { prettyConsole } from "../index.ts";
+import ContentJudgementService from "../services/critic.ts";
 
 /**
  * Represents the runtime environment for an agent, handling message processing,
@@ -122,6 +123,8 @@ export class AgentRuntime implements IAgentRuntime {
     transcriptionService: ITranscriptionService;
 
     imageDescriptionService: IImageRecognitionService;
+
+    contentJudgementService: ContentJudgementService;
 
     browserService: IBrowserService;
 
@@ -290,6 +293,9 @@ export class AgentRuntime implements IAgentRuntime {
 
         this.imageDescriptionService =
             ImageDescriptionService.getInstance(this);
+
+        this.contentJudgementService =
+            ContentJudgementService.getInstance(this);
 
         this.browserService = BrowserService.getInstance(this);
 

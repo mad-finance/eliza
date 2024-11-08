@@ -97,7 +97,6 @@ export class OrbGenerationClient extends ClientBase {
                     imageURL = content.attachments[0]?.url
                     return []
                 };
-                // TODO: generate an image
                 const memory = {
                     id: stringToUuid(datestr + "-" + this.runtime.agentId),
                     userId: this.runtime.agentId,
@@ -117,6 +116,9 @@ export class OrbGenerationClient extends ClientBase {
                     callback
                 );
             }
+
+            // const rating  = await this.contentJudgementService.judgeContent({text: content, imageUrl: imageURL})
+            // console.log("rating", rating)
 
             // Send the new post
             if (!this.dryRun) {

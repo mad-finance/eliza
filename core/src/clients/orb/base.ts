@@ -15,6 +15,7 @@ import {
 import ImageDescriptionService from "../../services/image.ts";
 
 import { glob } from "glob";
+import ContentJudgementService from "../../services/critic.ts";
 
 export function extractAnswer(text: string): string {
     const startIndex = text.indexOf("Answer: ") + 8;
@@ -83,6 +84,7 @@ export class ClientBase extends EventEmitter {
     lastCheckedPostId: number | null = null;
     postCacheFilePath = "postcache/latest_checked_post_id.txt";
     imageDescriptionService: ImageDescriptionService;
+    contentJudgementService: ContentJudgementService;
     temperature: number = 0.5;
     dryRun: boolean = false;
 
@@ -158,6 +160,7 @@ export class ClientBase extends EventEmitter {
             this.runtime.character.style.all.join("\n- ") +
             "- " +
             this.runtime.character.style.post.join();
+        this.contentJudgementService = ContentJudgementService.getInstance(this.runtime);
 
         try {
             if (fs.existsSync(this.postCacheFilePath)) {
