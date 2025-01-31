@@ -14,7 +14,7 @@ export const USDC_CONTRACT_ADDRESS = IS_PRODUCTION
     ? "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
     : "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 export const DEFAULT_HOOK_ADDRESS = IS_PRODUCTION
-    ? zeroAddress
+    ? "0x8dd4c756F183513850e874F7d1ffd0d7Cb498080"
     : "0xA788031C591B6824c032a0EFe74837EE5eaeC080";
 
 type RegistrationParams = {
@@ -76,9 +76,9 @@ export const registerClub = async (
     return { clubId };
 };
 
+// TODO: if registration fee is turned on do something here
 export const getRegistrationFee = async (
     amountEther: string,
-    curve: number,
     account?: `0x${string}`
 ): Promise<bigint> => {
     const amountWithDecimals = parseUnits(amountEther, DECIMALS);
@@ -86,8 +86,8 @@ export const getRegistrationFee = async (
     return (await client.readContract({
         address: LAUNCHPAD_CONTRACT_ADDRESS,
         abi: BonsaiLaunchpadAbi,
-        functionName: "getRegistrationFee",
-        args: [amountWithDecimals, curve],
+        functionName: "getBuyPrice",
+        args: [amountWithDecimals, "0"],
         account,
     })) as bigint;
 };
