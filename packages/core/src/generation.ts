@@ -1506,10 +1506,12 @@ export async function generateObjectDeprecated({
     runtime,
     context,
     modelClass,
+    modelProvider,
 }: {
     runtime: IAgentRuntime;
     context: string;
     modelClass: ModelClass;
+    modelProvider?: ModelProviderName;
 }): Promise<any> {
     if (!context) {
         elizaLogger.error("generateObjectDeprecated context is empty");
@@ -1520,11 +1522,19 @@ export async function generateObjectDeprecated({
     while (true) {
         try {
             // this is slightly different than generateObjectArray, in that we parse object, not object array
-            const response = await generateText({
+            let response = await generateText({
                 runtime,
                 context,
                 modelClass,
+                modelProvider,
             });
+
+            // HACK: would add this to handleProvider but ai package not yet compatible
+            if (modelProvider === ModelProviderName.VENICE) {
+                response = response
+                    .replace(/<think>[\s\S]*?<\/think>\s*\n*/g, '');
+            }
+
             const parsedResponse = parseJSONObjectFromText(response);
             if (parsedResponse) {
                 return parsedResponse;
@@ -1704,6 +1714,10 @@ export const generateImage = async (
         safeMode?: boolean;
         cfgScale?: number;
         returnRawResponse?: boolean;
+        inpaint?: {
+            strength: number;
+            source_image_base64: string;
+        }
     },
     runtime: IAgentRuntime
 ): Promise<{
@@ -1891,7 +1905,7 @@ export const generateImage = async (
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        model: model,
+                        model: data.modelId || model,
                         prompt: data.prompt,
                         cfg_scale: data.guidanceScale,
                         negative_prompt: data.negativePrompt,
@@ -1902,6 +1916,7 @@ export const generateImage = async (
                         seed: data.seed,
                         style_preset: data.stylePreset,
                         hide_watermark: data.hideWatermark,
+                        inpaint: data.inpaint,
                     }),
                 }
             );
@@ -2171,6 +2186,7 @@ export interface GenerationOptions {
     runtime: IAgentRuntime;
     context: string;
     modelClass: ModelClass;
+    modelProvider?: ModelProviderName;
     schema?: ZodSchema;
     schemaName?: string;
     schemaDescription?: string;
@@ -2206,6 +2222,7 @@ export const generateObject = async ({
     runtime,
     context,
     modelClass,
+    modelProvider,
     schema,
     schemaName,
     schemaDescription,
@@ -2221,8 +2238,8 @@ export const generateObject = async ({
         throw new Error(errorMessage);
     }
 
-    const provider = runtime.modelProvider;
-    const modelSettings = getModelSettings(runtime.modelProvider, modelClass);
+    const provider = modelProvider || runtime.modelProvider;
+    const modelSettings = getModelSettings(provider, modelClass);
     const model = modelSettings.name;
     const temperature = modelSettings.temperature;
     const frequency_penalty = modelSettings.frequency_penalty;
@@ -2230,7 +2247,7 @@ export const generateObject = async ({
     const max_context_length = modelSettings.maxInputTokens;
     const max_response_length = modelSettings.maxOutputTokens;
     const experimental_telemetry = modelSettings.experimental_telemetry;
-    const apiKey = runtime.token;
+    const apiKey = modelProvider ? getToken(runtime, modelProvider) : runtime.token;
 
     try {
         context = await trimTokens(context, max_context_length, runtime);
@@ -2346,6 +2363,13 @@ export async function handleProvider(
             return await handleDeepSeek(options);
         case ModelProviderName.LIVEPEER:
             return await handleLivepeer(options);
+        case ModelProviderName.VENICE:
+            return await generateObjectDeprecated({
+                runtime,
+                context,
+                modelClass,
+                modelProvider: provider,
+            });
         default: {
             const errorMessage = `Unsupported provider: ${provider}`;
             elizaLogger.error(errorMessage);

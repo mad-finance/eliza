@@ -7,7 +7,6 @@ import { SupabaseDatabaseAdapter } from "@elizaos/adapter-supabase";
 import { AutoClientInterface } from "@elizaos/client-auto";
 import { DiscordClientInterface } from "@elizaos/client-discord";
 import { InstagramClientInterface } from "@elizaos/client-instagram";
-import { LensAgentClientInterface } from "@elizaos/client-lens";
 import { SlackClientInterface } from "@elizaos/client-slack";
 import { TelegramClientInterface } from "@elizaos/client-telegram";
 import { TelegramAccountClientInterface } from "@elizaos/client-telegram-account";
@@ -15,7 +14,7 @@ import { TwitterClientInterface } from "@elizaos/client-twitter";
 import { AlexaClientInterface } from "@elizaos/client-alexa";
 import { MongoDBDatabaseAdapter } from "@elizaos/adapter-mongodb";
 import { DevaClientInterface } from "@elizaos/client-deva";
-import { OrbClientInterface } from "@elizaos/client-orb";
+import { BonsaiClientInterface } from "@elizaos/client-bonsai";
 
 import { FarcasterClientInterface } from "@elizaos/client-farcaster";
 import { OmniflixPlugin } from "@elizaos/plugin-omniflix";
@@ -858,19 +857,14 @@ export async function initializeClients(
         }
     }
 
-    if (clientTypes.includes("lens")) {
-        const lensClient = await LensAgentClientInterface.start(runtime);
-        clients.lens = lensClient;
-    }
-
-    if (clientTypes.includes(Clients.ORB)) {
-        const orbClient = await OrbClientInterface.start(runtime);
-        if (orbClient) clients.orb = orbClient;
-    }
-
     if (clientTypes.includes(Clients.SIMSAI)) {
         const simsaiClient = await JeeterClientInterface.start(runtime);
         if (simsaiClient) clients.simsai = simsaiClient;
+    }
+
+    if (clientTypes.includes(Clients.BONSAI)) {
+        const bonsaiClient = await BonsaiClientInterface.start(runtime);
+        clients.bonsai = bonsaiClient;
     }
 
     elizaLogger.log("client keys", Object.keys(clients));
