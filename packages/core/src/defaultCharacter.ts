@@ -5,8 +5,8 @@ export const defaultCharacter: Character = {
     name: "Sage",
     username: "bons_ai",
     plugins: [],
-    clients: [Clients.ORB, Clients.TWITTER, Clients.FARCASTER],
-    modelProvider: ModelProviderName.GROK,
+    clients: [Clients.BONSAI],
+    modelProvider: ModelProviderName.OPENAI,
     imageModelProvider: ModelProviderName.TITLES,
     settings: {
         secrets: {},
