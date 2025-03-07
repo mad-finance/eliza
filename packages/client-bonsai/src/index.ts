@@ -248,10 +248,9 @@ export class BonsaiClient {
                     }
 
                     res.status(200).json({
-                        uri: data.uri,
-                        updatedAt: data.updatedAt,
+                        data,
                         // suggest clients to poll every 15s
-                        processing: this.tasks.isProcessing(postId as string) ? true : undefined,
+                        isProcessing: this.tasks.isProcessing(postId as string),
                         versions
                     });
                 } else {

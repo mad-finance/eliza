@@ -8,9 +8,9 @@ import {
     type MediaVideoMimeType,
     MetadataLicenseType,
     MetadataAttributeType,
-    TextOnlyMetadata,
-    ImageMetadata,
-    VideoMetadata,
+    type TextOnlyMetadata,
+    type ImageMetadata,
+    type VideoMetadata,
 } from "@lens-protocol/metadata";
 import { handleOperationWith } from "@lens-protocol/client/viem";
 import { createWalletClient, http, type Account } from "viem";
@@ -35,57 +35,63 @@ interface PostParams {
 
 const baseMetadata = {
     appId: APP_ID,
-    attributes: [
+    attributes: ({ apiUrl }: { apiUrl: string }) => [
         {
-            type: MetadataAttributeType.STRING,
+            type: MetadataAttributeType.STRING as const,
             key: "framework",
             value: "ElizaOS"
         },
         {
-            type: MetadataAttributeType.STRING,
+            type: MetadataAttributeType.STRING as const,
             key: "plugin",
-            value: "client_bonsai",
+            value: "client-bonsai",
         },
         {
-            type: MetadataAttributeType.STRING,
-            key: "url",
-            value: "https://eliza.bonsai.meme/post"
+            type: MetadataAttributeType.STRING as const,
+            key: "apiUrl",
+            value: apiUrl
         }
     ],
 }
 
 export const formatMetadata = (params: PostParams): TextOnlyMetadata | ImageMetadata | VideoMetadata => {
-    let metadata: unknown;
-
     if (!(params.image || params.video)) {
-        metadata = textOnly({
+        return textOnly({
             content: params.text,
-            ...baseMetadata,
+            tags: [baseMetadata.appId],
+            attributes: baseMetadata.attributes({ apiUrl: process.env.DOMAIN as string }),
         });
-    } else if (params.image) {
-        metadata = image({
-            title: params.text,
+    }
+
+    if (params.image) {
+        return image({
+            content: params.text,
             image: {
                 item: params.image.url,
                 type: params.image.type,
+                altTag: params.text?.substring(0, 10),
                 license: MetadataLicenseType.CCO,
             },
-            ...baseMetadata,
+            tags: [baseMetadata.appId],
+            attributes: baseMetadata.attributes({ apiUrl: process.env.DOMAIN as string }),
         });
-    } else if (params.video) {
-        metadata = video({
-            title: params.text,
+    }
+
+    if (params.video) {
+        return video({
+            content: params.text,
             video: {
                 item: params.video.url,
                 cover: params.video.cover,
                 type: params.video.type,
                 license: MetadataLicenseType.CCO,
             },
-            ...baseMetadata,
+            tags: [baseMetadata.appId],
+            attributes: baseMetadata.attributes({ apiUrl: process.env.DOMAIN as string }),
         });
     }
 
-    return metadata;
+    throw new Error("formatMetadata:: Missing property for metadata");
 }
 
 export const uploadMetadata = async (params: PostParams): Promise<URI> => {
