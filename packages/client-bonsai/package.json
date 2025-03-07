@@ -29,7 +29,7 @@
         "express": "^4.18.2",
         "graphql": "^16.9.0",
         "graphql-request": "^7.1.2",
-        "handy-redis": "2.3.1",
+        "ioredis": "5.4.2",
         "jose": "^5.9.6",
         "lodash": "^4.17.21",
         "mongodb": "^6.10.0",
@@ -40,6 +40,7 @@
         "@types/body-parser": "1.19.5",
         "@types/cors": "2.8.17",
         "@types/express": "5.0.0",
+        "ts-node": "^10.9.2",
         "tsup": "^8.3.5"
     },
     "scripts": {
@@ -50,7 +51,8 @@
         "lint": "biome lint .",
         "lint:fix": "biome check --apply .",
         "format": "biome format .",
-        "format:fix": "biome format --write ."
+        "format:fix": "biome format --write .",
+        "cron:update-posts": "node scripts/cron-update-posts.ts"
     },
     "peerDependencies": {
         "@elizaos/core": "workspace:*",

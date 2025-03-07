@@ -1,8 +1,6 @@
-import { createNodeRedisClient } from "handy-redis";
-
-const { REDIS_URL } = process.env;
+import { Redis } from "ioredis";
 
 // volatile-lru
-const client = createNodeRedisClient(`${REDIS_URL as string}?family=0`);
+const client = new Redis(`${process.env.REDIS_URL as string}?family=0`);
 
 export default client;

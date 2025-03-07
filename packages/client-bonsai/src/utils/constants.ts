@@ -26,6 +26,7 @@ export const CHAIN_TO_BONSAI = {
 };
 
 export const DEFAULT_MAX_STALE_TIME = 1800; // 30min for clients to wait before fetching updated content
+export const DEFAULT_FREEZE_TIME = 86400; // 24h of no updates before a post is frozen
 
 export const APP_ID = "BONSAI"; // lens post app id
 export const BONSAI_CLIENT_VERSION = "1.0.0"; // bonsai client version

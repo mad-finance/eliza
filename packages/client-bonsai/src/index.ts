@@ -36,7 +36,7 @@ import authenticate from "./services/lens/authenticate";
 import { createPost, editPost } from "./services/lens/createPost";
 import { refreshMetadataFor, refreshMetadataStatusFor } from "./services/lens/refreshMetadata";
 import { formatSmartMedia } from "./utils/utils";
-import { BONSAI_CLIENT_VERSION } from "./utils/constants";
+import { BONSAI_CLIENT_VERSION, DEFAULT_FREEZE_TIME } from "./utils/constants";
 import { LENS_CHAIN_ID } from "./services/lens/client";
 
 /**
@@ -341,6 +341,7 @@ export class BonsaiClient {
     /**
      * Handles the update process for a smart media post.
      * Generates new content, updates metadata, and refreshes the Lens post.
+     * If a post is not updated after enough checks, we freeze it to avoid future checks from the cron job
      *
      * @param {string} postId - Lens post ID
      * @returns {Promise<void>}
@@ -353,8 +354,19 @@ export class BonsaiClient {
         const runtime = this.agents.get(process.env.GLOBAL_AGENT_ID as UUID);
         const template = this.templates.get(data.template);
         const response = await template?.handler(runtime as IAgentRuntime, data);
+
+        // no metadata likely means nothing to update or template failed
         if (!response?.metadata) {
-            elizaLogger.error(`Failed to update post: ${postId}`);
+            elizaLogger.log(`skipping update for post: ${postId}`);
+
+            // freeze the post to skip future checks
+            if ((Math.floor(Date.now() / 1000)) - data.updatedAt > DEFAULT_FREEZE_TIME) {
+                elizaLogger.log(`freezing post: ${postId}`);
+                await this.mongo.media?.updateOne(
+                    { postId },
+                    { $set: { frozen: true } }
+                );
+            }
             return;
         }
 
